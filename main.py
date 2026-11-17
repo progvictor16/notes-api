@@ -1,21 +1,35 @@
-from fastapi import FastAPI
-from models import Note
+from fastapi import FastAPI, HTTPException
+
+from models import Note, NoteCreate
 
 app = FastAPI()
 
 notes = []
+next_id = 1
+
 
 @app.get("/health")
 def health_check():
-    return {"status":"ok"}
+    return {"status": "ok"}
+
 
 @app.post("/notes")
-def create_note(note: Note):
-    notes.append(note)
-    return note
-    
+def create_note(note: NoteCreate):
+    global next_id
+    new_note = Note(id=next_id, title=note.title, content=note.content)
+    next_id += 1
+    notes.append(new_note)
+    return new_note
+
 
 @app.get("/notes")
 def get_notes():
     return notes
 
+
+@app.get("/notes/{note_id}")
+def get_note(note_id: int):
+    for note in notes:
+        if note.id == note_id:
+            return note
+    raise HTTPException(status_code=404, detail="Note not found")
