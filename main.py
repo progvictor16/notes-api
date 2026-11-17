@@ -4,8 +4,16 @@ from models import Note, NoteCreate
 
 app = FastAPI()
 
+
 notes = []
 next_id = 1
+
+
+def find_note(note_id: int):
+    for note in notes:
+        if note.id == note_id:
+            return note
+    raise HTTPException(status_code=404, detail="Note not found")
 
 
 @app.get("/health")
@@ -29,26 +37,20 @@ def get_notes():
 
 @app.get("/notes/{note_id}")
 def get_note(note_id: int):
-    for note in notes:
-        if note.id == note_id:
-            return note
-    raise HTTPException(status_code=404, detail="Note not found")
+    note = find_note(note_id)
+    return note
 
 
 @app.put("/notes/{note_id}")
 def modify_note(note_id: int, updated_note: NoteCreate):
-    for note in notes:
-        if note.id == note_id:
-            note.title = updated_note.title
-            note.content = updated_note.content
-            return note
-    raise HTTPException(status_code=404, detail="Note not found")
+    note = find_note(note_id)
+    note.title = updated_note.title
+    note.content = updated_note.content
+    return note
 
 
 @app.delete("/notes/{note_id}")
 def delete_note(note_id: int):
-    for note in notes:
-        if note.id == note_id:
-            notes.remove(note)
-            return note
-    raise HTTPException(status_code=404, detail="Note not found")
+    note = find_note(note_id)
+    notes.remove(note)
+    return note
