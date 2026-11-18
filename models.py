@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from sqlmodel import Field, SQLModel
 
 
-class NoteCreate(BaseModel):
+class NoteCreate(SQLModel):
     title: str
     content: str
 
 
-class Note(NoteCreate):
-    id: int
+class Note(NoteCreate, table=True):
+    id: int | None = Field(default=None, primary_key=True)
